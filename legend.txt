@@ -1,0 +1,112 @@
+"""
+=========================================
+Neural Net Variable Legend – 2 -> 4 -> 1
+=========================================
+"""
+
+# -------------------------
+# Inputs
+# -------------------------
+# x: input vector (coordinate)
+# Shape: (2,1) column vector
+# Example: [[0.3], [0.7]]
+# Obtained from: Random sampling
+# x = np.array([[x_val],[y_val]])
+
+# y: true label (0 or 1)
+# Shape: scalar (or (1,1))
+# Obtained from: rule.is_inside(x_val, y_val)
+
+# -------------------------
+# Parameters (learned)
+# -------------------------
+# W1: weights input -> hidden
+# Shape: (4,2)  # 4 hidden neurons × 2 inputs
+# Each row = weights for one hidden neuron
+
+# b1: biases for hidden neurons
+# Shape: (4,1)  # 1 bias per hidden neuron
+
+# W2: weights hidden -> output
+# Shape: (1,4)  # 1 output neuron × 4 hidden neurons
+
+# b2: bias for output neuron
+# Shape: (1,1)
+
+# -------------------------
+# Forward pass
+# -------------------------
+# z1: hidden pre-activation
+# Shape: (4,1)
+# Computed: z1 = W1 @ x + b1
+
+# a1: hidden activations (ReLU)
+# Shape: (4,1)
+# Computed: a1 = ReLU(z1)
+
+# z2: output pre-activation
+# Shape: (1,1)
+# Computed: z2 = W2 @ a1 + b2
+
+# y_hat: predicted probability
+# Shape: (1,1)
+# Computed: y_hat = sigmoid(z2)
+
+# -------------------------
+# Loss
+# -------------------------
+# loss: binary cross-entropy
+# Shape: scalar
+# Computed: loss = -(y*log(y_hat) + (1-y)*log(1-y_hat))
+# y_hat_clipped: clipped y_hat to avoid log(0)
+# Computed: y_hat_clipped = np.clip(y_hat, 1e-15, 1-1e-15)
+
+# -------------------------
+# Backpropagation (gradients)
+# -------------------------
+# dz2: gradient of loss w.r.t z2
+# Shape: (1,1)
+# Computed: dz2 = y_hat - y
+
+# dW2: gradient of loss w.r.t W2
+# Shape: (1,4)
+# Computed: dW2 = dz2 @ a1.T
+
+# db2: gradient of loss w.r.t b2
+# Shape: (1,1)
+# Computed: db2 = dz2
+
+# da1: error signal for hidden layer
+# Shape: (4,1)
+# Computed: da1 = W2.T @ dz2
+
+# dz1: gradient of loss w.r.t z1
+# Shape: (4,1)
+# Computed: dz1 = da1 * (z1 > 0)  # ReLU derivative
+
+# dW1: gradient of loss w.r.t W1
+# Shape: (4,2)
+# Computed: dW1 = dz1 @ x.T
+
+# db1: gradient of loss w.r.t b1
+# Shape: (4,1)
+# Computed: db1 = dz1
+
+# -------------------------
+# Parameter update (gradient descent)
+# -------------------------
+# Learning rate: lr (scalar)
+# W1 -= lr * dW1
+# b1 -= lr * db1
+# W2 -= lr * dW2
+# b2 -= lr * db2
+
+# -------------------------
+# Flow summary
+# -------------------------
+# 1. Input x → hidden layer: z1 → a1
+# 2. Hidden → output layer: z2 → y_hat
+# 3. Compute loss vs y
+# 4. Backprop: dz2 → da1 → dz1
+# 5. Compute gradients: dW2, db2, dW1, db1
+# 6. Update weights & biases
