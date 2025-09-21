@@ -3,6 +3,8 @@ import os
 import matplotlib.pyplot as plt
 
 def draw_points(step=0):
+    correct = 0
+    total = 0
     # Load test log
     with open("test_log.json", "r") as f:
         data = json.load(f)
@@ -12,8 +14,10 @@ def draw_points(step=0):
     for row in data:
         Xs.append(row["x"])
         Ys.append(row["y"])
+        total += 1
         if row["correct"].lower() == "y":
             colors.append("green")
+            correct += 1
         else:
             colors.append("red")
 
@@ -33,11 +37,11 @@ def draw_points(step=0):
     plt.xlim(0, 1)
     plt.ylim(0, 1)
     plt.gca().set_aspect("equal", adjustable="box")
-    plt.title(f"Model Evaluation (Step {step})")
+    plt.title(f"Model Evaluation (Step {step}) - Accuracy: {correct}/{total} = {correct/total:.2%}i ")
 
     # Save image
     os.makedirs("images2", exist_ok=True)
-    plt.savefig(f"images2/snapshot_{step:05d}.png")
+    plt.savefig(f"images2/snapshot_{(int(step/100)):05d}.png")
     plt.close()
 
 if __name__ == "__main__":

@@ -3,12 +3,15 @@ import numpy as np
 from model import SimpleNN
 from rule import is_inside
 
+
+
 class Trainer:
     def __init__(self, model: SimpleNN, learning_rate=0.01):
         self.model = model
         self.lr = learning_rate
+        
 
-    def binary_cross_entropy(self, y_hat, y):
+    def binary_cross_entropy(self, y_hat, y, pos_weight=9.0, neg_weight=1.0):
         """
         Binary cross-entropy loss.
         y_hat: predicted probability (scalar, 1x1 array)
@@ -16,7 +19,7 @@ class Trainer:
         """
         eps = 1e-15  # avoid log(0)
         y_hat_clipped = np.clip(y_hat, eps, 1 - eps)
-        loss = -(y * np.log(y_hat_clipped) + (1 - y) * np.log(1 - y_hat_clipped))
+        loss = -(pos_weight * y * np.log(y_hat_clipped) + neg_weight * (1 - y) * np.log(1 - y_hat_clipped))
         return loss
 
     def forward_and_backward(self, x, y):
@@ -54,10 +57,25 @@ class Trainer:
         dW1 = np.dot(dz1, x.T)                 # (4,2)
         db1 = dz1                              # (4,1)
 
+        """
         # --- Update parameters (gradient descent) ---
         self.model.W1 -= self.lr * dW1
         self.model.b1 -= self.lr * db1
         self.model.W2 -= self.lr * dW2
-        self.model.b2 -= self.lr * db2
+        self.model.b2 -= self.lr * db2"""
+
+        if y == 1:
+            scale =  1/ self.model.innerProb
+        else:
+            scale = 1
+
+        self.model.W1 -= self.lr * dW1 * scale
+        self.model.b1 -= self.lr * db1 * scale
+        self.model.W2 -= self.lr * dW2 * scale
+        self.model.b2 -= self.lr * db2 * scale
+
+
+    
+
 
         return loss, correct

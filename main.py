@@ -6,19 +6,35 @@ from train import Trainer
 from rule import is_inside
 import json
 from snapshot import draw_network
+import os
+from snapshot2 import draw_points
+
 
 # -------------------------
 # Step 0: Initialize parameters
-# -------------------------
+# --------------------
+# -----
 # Set hyperparameters
 learning_rate = 0.001
-num_iterations = 100000
-log_step = 300
+num_iterations = 300000#0000
+log_step = 10000
 log = False
+log2 = True
 #batch_size = 32  # Optional: can do one sample at a time to start
 
 # Create the model
 model = SimpleNN(input_dim=2, hidden_dim=4, output_dim=1)
+WEIGHTS_JSON = "weights.json"
+TEST_LOG = "test_log.json"
+NUM_TEST = 10000
+
+if not os.path.exists(WEIGHTS_JSON):
+    raise FileNotFoundError(f"{WEIGHTS_JSON} not found. Create it with your reset script first.")
+
+with open(WEIGHTS_JSON, "r") as f:
+    w = json.load(f)
+
+
 
 # Create the trainer
 trainer = Trainer(model, learning_rate)
@@ -27,6 +43,12 @@ trainer = Trainer(model, learning_rate)
 with open("weights.json", "r") as f:
     weights = json.load(f)
 
+if log2:
+    with open(TEST_LOG, "w") as f:
+        json.dump([], f)
+
+data = []
+
 # Convert lists back to numpy arrays and assign
 model.W1 = np.array(weights["W1"])
 model.b1 = np.array(weights["b1"])
@@ -34,9 +56,13 @@ model.W2 = np.array(weights["W2"])
 model.b2 = np.array(weights["b2"])
 
 
+
+
 # -------------------------
 # Step 2: Training loop
 # -------------------------
+
+
 if __name__ == "__main__":
 
     print("Starting training...")
@@ -57,6 +83,21 @@ if __name__ == "__main__":
         loss, correct = trainer.forward_and_backward(x, y)
         if correct:
             total_correct += 1
+            
+        if log2:
+            if correct:
+                entry = {"x": float(x[0]), "y": float(x[1]), "correct": "y"}
+                data.append(entry)
+            else:
+                entry = {"x": float(x[0]), "y": float(x[1]), "correct": "n"}
+                data.append(entry)
+            
+            if iteration % log_step == 0 or iteration == num_iterations - 1:
+                with open(TEST_LOG, "w") as f:
+                    json.dump(data, f, indent=2)
+                draw_points(step=iteration)
+                data = []
+            
         
 
 
