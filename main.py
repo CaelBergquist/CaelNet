@@ -8,6 +8,7 @@ import json
 from snapshot import draw_network
 import os
 from snapshot2 import draw_points
+import sys
 
 
 # -------------------------
@@ -15,11 +16,15 @@ from snapshot2 import draw_points
 # --------------------
 # -----
 # Set hyperparameters
-learning_rate = 0.001
-num_iterations = 300000#0000
+global learning_rate
+learning_rate = .001 # used as min for RLR, min reccomended is .001
+max_learning_rate = .1 # used as max for RLR, max reccomended is .1
+num_iterations = 1000000#0000
 log_step = 10000
 log = False
 log2 = True
+goal = .97 # only implemented with log2 on
+RLR = True # reactive learning rate based off accuracy, only implemented with log2 on
 #batch_size = 32  # Optional: can do one sample at a time to start
 
 # Create the model
@@ -70,6 +75,7 @@ if __name__ == "__main__":
     total_correct = 0
     for iteration in range(num_iterations):
         
+        # Draw NN snapshot
         if log and iteration % (int)(num_iterations/log_step) == 0:
             draw_network(step=iteration, accuracy=total_correct/((int)(num_iterations/log_step)) if iteration>0 else 0, 
                          weights_input_hidden=model.W1, bias_hidden=model.b1, weights_hidden_output=model.W2, bias_output=model.b2)
@@ -83,7 +89,9 @@ if __name__ == "__main__":
         loss, correct = trainer.forward_and_backward(x, y)
         if correct:
             total_correct += 1
-            
+
+
+        # Draw DB snapshot    
         if log2:
             if correct:
                 entry = {"x": float(x[0]), "y": float(x[1]), "correct": "y"}
@@ -95,8 +103,27 @@ if __name__ == "__main__":
             if iteration % log_step == 0 or iteration == num_iterations - 1:
                 with open(TEST_LOG, "w") as f:
                     json.dump(data, f, indent=2)
-                draw_points(step=iteration)
-                data = []
+
+                
+                corr_percent = draw_points(step=iteration)
+                if corr_percent >= goal and goal != 0 and iteration > 0:
+                    print(f"\nReached goal accuracy of {goal*100}% at iteration {iteration}. Stopping training.")
+                    break
+                else:
+                    if RLR: #reactive learning rate
+                        lr = max_learning_rate - (max_learning_rate - learning_rate ) * corr_percent**2
+                        trainer.lr = lr
+                        
+                        print(f"\nIteration {iteration}: Adjusted learning rate to {lr:.5f} based on accuracy {corr_percent*100:.2f}%")
+
+                data = []  # Clear data after logging
+
+        # Progress bar
+        '''
+        percent = int((iteration + 1) / num_iterations * 100)
+        bars = percent // 5  # one bar per 5%
+        bar_str = "[" + "#" * bars + "-" * (20 - bars) + "]"
+        print(f"\r{bar_str} {percent:3d}%", end="", flush=True)'''
             
         
 

@@ -1,8 +1,8 @@
 import cv2
 import os
 
-image_folder = 'videos/images3'
-video_name = 'video3.avi'
+image_folder = 'videos/images6'
+video_name = 'video6.avi'
 
 images = [img for img in os.listdir(image_folder) if img.endswith(".png")]
 frame = cv2.imread(os.path.join(image_folder, images[0]))

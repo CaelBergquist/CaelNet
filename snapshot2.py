@@ -43,6 +43,7 @@ def draw_points(step=0):
     os.makedirs("images2", exist_ok=True)
     plt.savefig(f"images2/snapshot_{(int(step/100)):05d}.png")
     plt.close()
+    return correct/total
 
 if __name__ == "__main__":
     draw_points(step=0)

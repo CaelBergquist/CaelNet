@@ -1,0 +1,40 @@
+import numpy as np
+import json
+
+
+# this version is more fined tuned for specific use with 2-4-1 square model
+
+def random_direction_matrix(out_dim, in_dim, scale=10.0, seed=None):
+    """Generate weights with diverse directions and controlled magnitude."""
+    if seed is not None:
+        rng = np.random.RandomState(seed)
+    else:
+        rng = np.random
+
+    W = np.zeros((out_dim, in_dim))
+    for i in range(out_dim):
+        # random unit direction
+        v = rng.randn(in_dim) #random vector of size input dimention
+        v /= np.linalg.norm(v) + 1e-8 # normalize to unit length, rand direction w/ length 1
+        W[i] = v * scale * (0.5 + rng.rand()) # scale between .5 and 1.5 times the scale factor
+    return W
+
+def logit(p):
+    return np.log(p / (1 - p)) # ensure predictions arent neutral
+
+p = 0.25
+
+# moderate scale around 10 works well 
+W1 = random_direction_matrix(4, 2, scale=10.0)
+b1 = np.random.uniform(-5, 5, (4, 1))  # spread out the lines a bit
+
+# smaller output weights to start smooth
+W2 = np.random.uniform(-5, 5, (1, 4))
+b2 = np.array([[logit(p)]])
+
+weights = {"W1": W1.tolist(), "b1": b1.tolist(), "W2": W2.tolist(), "b2": b2.tolist()}
+
+with open("weights.json", "w") as f:
+    json.dump(weights, f, indent=2)
+
+print("Diversified weights.json created!")

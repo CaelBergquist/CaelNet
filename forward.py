@@ -10,7 +10,7 @@ from snapshot2 import draw_points
 #np.random.seed(42)
 WEIGHTS_JSON = "weights.json"
 TEST_LOG = "test_log.json"
-NUM_TEST = 10000
+NUM_TEST = 100000
 
 if not os.path.exists(WEIGHTS_JSON):
     raise FileNotFoundError(f"{WEIGHTS_JSON} not found. Create it with your reset script first.")

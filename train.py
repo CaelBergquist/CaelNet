@@ -65,7 +65,7 @@ class Trainer:
         self.model.b2 -= self.lr * db2"""
 
         if y == 1:
-            scale =  1/ self.model.innerProb
+            scale =  1/ self.model.innerProb  #scale learing rate based on inner/outer ratio
         else:
             scale = 1
 
